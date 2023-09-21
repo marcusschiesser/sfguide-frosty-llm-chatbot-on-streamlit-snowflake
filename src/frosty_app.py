@@ -2,7 +2,8 @@ import openai
 import re
 import streamlit as st
 from charts import render_data
-from prompts import get_system_prompt
+from examples import render_examples
+from prompts import get_inital_messages
 
 st.title("☃️ Frosty")
 
@@ -11,7 +12,7 @@ openai.api_key = st.secrets.OPENAI_API_KEY
 if "messages" not in st.session_state:
     # system prompt includes table information, rules, and prompts the LLM to produce
     # a welcome message to the user.
-    st.session_state.messages = [{"role": "system", "content": get_system_prompt()}]
+    st.session_state.messages = get_inital_messages()
 
 # Prompt for user input and save
 if prompt := st.chat_input():
@@ -25,6 +26,13 @@ for i, message in enumerate(st.session_state.messages):
         st.write(message["content"])
         if "results" in message:
             render_data(key=i, data=message["results"])
+
+if i == 1:  # bot just said hello
+    example = render_examples()
+    if example:
+        st.session_state.messages.append({"role": "user", "content": example})
+        with st.chat_message("user"):
+            st.write(example)
 
 # If last message is not from assistant, we need to generate a new response
 if st.session_state.messages[-1]["role"] != "assistant":

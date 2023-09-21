@@ -40,9 +40,6 @@ and wrap the generated sql code with ``` sql code markdown in this format e.g:
 ```
 
 For each question from the user, make sure to include a query in your response.
-
-Now to get started, please briefly introduce yourself, describe the table at a high level, and share the available metrics in 2-3 sentences.
-Then provide 3 example questions using bullet points.
 """
 
 @st.cache_data(show_spinner=False)
@@ -87,6 +84,30 @@ def get_system_prompt():
         metadata_query=METADATA_QUERY
     )
     return GEN_SQL.format(context=table_context)
+
+
+def get_hello_message():
+    return """
+Hello there! I am Frosty, your AI Snowflake SQL Expert. I specialize in querying a financial database, which contains various financial metrics for US banks since 1983. 
+
+Here are some of the available metrics:
+
+- All Real Estate Loans: Loans secured primarily by real estate.
+- Total deposits: The sum of all types of deposits held by the banks.
+- % Insured (Estimated): Percentage of deposits estimated to be insured.
+- Total Securities: The sum of securities held by the banks.
+- Total Assets: The sum of all assets owned by the banks.
+
+Try an example question:
+"""
+
+
+def get_inital_messages():
+    return [
+        {"role": "system", "content": get_system_prompt()},
+        {"role": "assistant", "content": get_hello_message()},
+    ]
+
 
 # do `streamlit run prompts.py` to view the initial system prompt in a Streamlit app
 if __name__ == "__main__":
