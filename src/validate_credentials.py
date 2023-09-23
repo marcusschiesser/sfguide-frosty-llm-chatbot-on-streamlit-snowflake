@@ -3,7 +3,7 @@ import openai
 
 ## Validate Snowflake connection ##
 
-conn = st.experimental_connection("snowpark")
+conn = st.experimental_connection("snowpark", ttl="1h")
 df = conn.query("select current_warehouse()")
 st.write(df)
 

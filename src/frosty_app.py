@@ -52,7 +52,7 @@ if st.session_state.messages[-1]["role"] != "assistant":
         sql_match = re.search(r"```sql\n(.*)\n```", response, re.DOTALL)
         if sql_match:
             sql = sql_match.group(1)
-            conn = st.experimental_connection("snowpark")
+            conn = st.experimental_connection("snowpark", ttl="1h")
             message["results"] = {"data": conn.query(sql)}
             render_data(key=len(st.session_state.messages), data=message["results"])
         st.session_state.messages.append(message)

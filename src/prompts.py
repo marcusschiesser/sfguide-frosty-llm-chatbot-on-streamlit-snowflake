@@ -45,8 +45,9 @@ For each question from the user, make sure to include a query in your response.
 @st.cache_data(show_spinner=False)
 def get_table_context(table_name: str, table_description: str, metadata_query: str = None):
     table = table_name.split(".")
-    conn = st.experimental_connection("snowpark")
-    columns = conn.query(f"""
+    conn = st.experimental_connection("snowpark", ttl="1h")
+    columns = conn.query(
+        f"""
         SELECT COLUMN_NAME, DATA_TYPE FROM {table[0].upper()}.INFORMATION_SCHEMA.COLUMNS
         WHERE TABLE_SCHEMA = '{table[1].upper()}' AND TABLE_NAME = '{table[2].upper()}'
         """,
