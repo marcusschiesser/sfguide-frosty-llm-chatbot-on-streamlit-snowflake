@@ -1,6 +1,6 @@
 import streamlit as st
 from charts import render_data
-from editor import parse_sql, render_sql
+from editor import SQLMatch
 from examples import render_examples
 from llm import get_response
 from prompts import get_inital_messages
@@ -25,8 +25,11 @@ for i, message in enumerate(st.session_state.messages):
             render_data(key=i, data=message["results"])
         elif i == num_messages - 1 and "sql_match" in message:
             # render the SQL editor for the last message with an SQL match
-            if results := render_sql(sql_match=message["sql_match"]):
-                message["results"] = results
+            sql_match: SQLMatch = message["sql_match"]
+            if updated_sql := sql_match.edit_sql():
+                conn = st.experimental_connection("snowpark", ttl="1h")
+                message["results"] = {"data": conn.query(updated_sql)}
+                message["content"] = sql_match.to_markdown()
                 st.experimental_rerun()
         else:
             st.write(message["content"])
@@ -53,7 +56,7 @@ if st.session_state.messages[-1]["role"] == "user":
         message = {"role": "assistant", "content": response}
 
         # Parse the response for a SQL query
-        if sql_match := parse_sql(response):
+        if sql_match := SQLMatch.parse_markdown(response):
             message["sql_match"] = sql_match
         st.session_state.messages.append(message)
         st.experimental_rerun()
