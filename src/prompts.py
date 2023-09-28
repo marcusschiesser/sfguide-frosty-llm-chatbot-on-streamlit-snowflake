@@ -1,6 +1,8 @@
 import streamlit as st
 
-QUALIFIED_TABLE_NAME = "FROSTY_SAMPLE.CYBERSYN_FINANCIAL.FINANCIAL_ENTITY_ANNUAL_TIME_SERIES"
+QUALIFIED_TABLE_NAME = (
+    "FROSTY_SAMPLE.CYBERSYN_FINANCIAL.FINANCIAL_ENTITY_ANNUAL_TIME_SERIES"
+)
 TABLE_DESCRIPTION = """
 This table has various metrics for financial entities (also referred to as banks) since 1983.
 The user may describe the entities interchangeably as banks, financial institutions, or financial entities.
@@ -42,8 +44,11 @@ and wrap the generated sql code with ``` sql code markdown in this format e.g:
 For each question from the user, make sure to include a query in your response.
 """
 
+
 @st.cache_data(show_spinner=False)
-def get_table_context(table_name: str, table_description: str, metadata_query: str = None):
+def get_table_context(
+    table_name: str, table_description: str, metadata_query: str = None
+):
     table = table_name.split(".")
     conn = st.experimental_connection("snowpark", ttl="1h")
     columns = conn.query(
@@ -78,11 +83,12 @@ Here are the columns of the {'.'.join(table)}
         context = context + f"\n\nAvailable variables by VARIABLE_NAME:\n\n{metadata}"
     return context
 
+
 def get_system_prompt():
     table_context = get_table_context(
         table_name=QUALIFIED_TABLE_NAME,
         table_description=TABLE_DESCRIPTION,
-        metadata_query=METADATA_QUERY
+        metadata_query=METADATA_QUERY,
     )
     return GEN_SQL.format(context=table_context)
 
@@ -90,16 +96,6 @@ def get_system_prompt():
 def get_hello_message():
     return """
 Hello there! I am Frosty, your AI Snowflake SQL Expert. I specialize in querying a financial database, which contains various financial metrics for US banks since 1983. 
-
-Here are some of the available metrics:
-
-- All Real Estate Loans: Loans secured primarily by real estate.
-- Total deposits: The sum of all types of deposits held by the banks.
-- % Insured (Estimated): Percentage of deposits estimated to be insured.
-- Total Securities: The sum of securities held by the banks.
-- Total Assets: The sum of all assets owned by the banks.
-
-Try an example question:
 """
 
 

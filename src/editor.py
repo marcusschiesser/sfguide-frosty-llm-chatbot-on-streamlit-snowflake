@@ -28,6 +28,7 @@ def render_sql(sql_match: SQLMatch):
     updated_sql = st_monaco(value=sql_match.sql, height="300px", language="sql")
     st.markdown(sql_match.after)
 
+    st.write("**You can now edit the query, run it or ask a new question below**")
     if st.button("Run Query"):
         conn = st.experimental_connection("snowpark", ttl="1h")
         return {"data": conn.query(updated_sql)}

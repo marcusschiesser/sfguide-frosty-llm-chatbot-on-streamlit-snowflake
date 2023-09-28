@@ -9,6 +9,7 @@ EXAMPLES = [
 
 
 def render_examples():
+    st.write("**Enter your question or pick one of the examples:**")
     columns = st.columns(len(EXAMPLES))
     for i, column in enumerate(columns):
         with column:
