@@ -3,6 +3,8 @@ import streamlit as st
 
 openai.api_key = st.secrets.OPENAI_API_KEY
 
+SEND_EXAMPLE_RESPONSE = False
+
 EXAMPLE_RESPONSE = """
 Sure, in order to get the total value of "All Real Estate Loans" per bank for the year 2020, we can group by the entity (or bank) and sum the value. Here's the SQL command to achieve this:
 
@@ -27,6 +29,8 @@ def get_example_response(container):
 
 
 def get_response(container):
+    if SEND_EXAMPLE_RESPONSE:
+        return get_example_response(container)
     response = ""
     for delta in openai.ChatCompletion.create(
         model="gpt-4",

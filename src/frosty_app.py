@@ -1,9 +1,10 @@
 import streamlit as st
-from charts import render_data
+from charts import DataResult
 from editor import SQLMatch
 from examples import render_examples
 from llm import get_response
 from prompts import get_inital_messages
+import time
 
 st.title("☃️ Frosty")
 
@@ -14,6 +15,14 @@ if "messages" not in st.session_state:
     st.session_state.messages = get_inital_messages()
 
 
+def run_query(query: str) -> DataResult:
+    current_time = time.time()
+    conn = st.experimental_connection("snowpark", ttl="1h")
+    data = conn.query(query)
+    run_time = time.time() - current_time
+    return DataResult(data=data, run_time=run_time)
+
+
 # display the existing chat messages
 num_messages = len(st.session_state.messages)
 for i, message in enumerate(st.session_state.messages):
@@ -22,13 +31,13 @@ for i, message in enumerate(st.session_state.messages):
     with st.chat_message(message["role"]):
         if "results" in message:
             st.write(message["content"])
-            render_data(key=i, data=message["results"])
+            data_result: DataResult = message["results"]
+            data_result.render(key=i)
         elif i == num_messages - 1 and "sql_match" in message:
             # render the SQL editor for the last message with an SQL match
             sql_match: SQLMatch = message["sql_match"]
             if updated_sql := sql_match.edit_sql():
-                conn = st.experimental_connection("snowpark", ttl="1h")
-                message["results"] = {"data": conn.query(updated_sql)}
+                message["results"] = run_query(updated_sql)
                 message["content"] = sql_match.to_markdown()
                 st.experimental_rerun()
         else:
